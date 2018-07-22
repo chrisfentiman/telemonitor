@@ -1,0 +1,26 @@
+{
+  "currency": "USD",
+  "currency_symbol": "$",
+  "electricity_cost": 0.09,
+  "miner_poll": 5,
+  "token": "TELEGRAM_TOKEN",
+  "auth_usernames": ["USER1"],
+  "notification_channel": "@channel",
+  "clay": [
+    {
+      "name": "rig1",
+      "host": "127.0.0.1",
+      "port": 3333,
+      "password": "",
+      "is_dual": false,
+      "coin_name": "Ethereum",
+      "coin_tag": "ETH",
+      "gpu_thresholds": {
+        "hashrate": 28,
+        "althashrate": 1,
+        "temp": 80,
+        "fan_speed": 20
+      }
+    }
+  ]
+}
