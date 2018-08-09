@@ -134,7 +134,7 @@ type botConfig struct {
 		Name       string     `json:"name"`
 		Addr       string     `json:"host"`
 		Port       int        `json:"port"`
-		Password string `json:"password"`
+		Password   string     `json:"password"`
 		IsDual     bool       `json:"is_dual"`
 		CoinName   string     `json:"coin_name"`
 		CoinTag    string     `json:"coin_tag"`
@@ -516,8 +516,8 @@ func (t *tele) clayQuery() map[string]rig {
 					rig.Status = "Offline"
 					rigs[cfg.Name] = rig
 				}
-			} 
-				log.Println(fmt.Sprintf("ERROR: Rig %s not found %s", cfg.Name, err))
+			}
+			log.Println(fmt.Sprintf("ERROR: Rig %s not found %s", cfg.Name, err))
 			continue
 		}
 
@@ -528,7 +528,6 @@ func (t *tele) clayQuery() map[string]rig {
 				log.Println(err)
 			}
 		}
-
 
 		if t.prevRigs != nil {
 			was := len(t.prevRigs[cfg.Name].GPUS)
@@ -545,14 +544,21 @@ func (t *tele) clayQuery() map[string]rig {
 
 		gps := make([]gpus, 0)
 		for i, mine := range r.GPUS {
-			if mine.IsStuck() {
-				s := fmt.Sprintf("ERROR: GPU#%v in rig %s is stuck. 0Mh/s", i, cfg.Name)
-				msg := tgbotapi.NewMessageToChannel(t.cfg.NotifyChan, s)
-				if _, err := t.bot.Send(msg); err != nil {
-					log.Println(err)
+			if rig, ok := t.rigs[cfg.Name]; ok {
+				switch {
+				case mine.IsStuck() && rig.Status == "Offline":
+					continue
+				case mine.IsStuck() && rig.Status == "Wounded":
+					continue
+				case mine.IsStuck() && rig.Status == "Online":
+					s := fmt.Sprintf("ERROR: GPU#%v in %s is stuck. 0Mh/s", i, cfg.Name)
+					msg := tgbotapi.NewMessageToChannel(t.cfg.NotifyChan, s)
+					if _, err := t.bot.Send(msg); err != nil {
+						log.Println(err)
+					}
+					status = "Wounded"
+					continue
 				}
-				status = "Wounded"
-				continue
 			}
 
 			gps = append(gps, gpus{
